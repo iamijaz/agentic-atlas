@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
+<title>Agentic Stack Atlas</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a working tool — compact header, filter bar, one scrollable table grouped by round */
+:root{
+  --bg:#f6f7f9; --panel:#ffffff; --fg:#17202b; --muted:#5b6675; --line:#dfe3ea; --accent:#2457c5; --accent-soft:#e6edfb;
+  --ms:#0f6cbd; --ms-soft:#e3effa; --anth:#b0532c; --anth-soft:#f8eae3; --oth:#5d6470; --oth-soft:#eceef1;
+  --core:#16794a; --core-soft:#e1f3ea; --know:#2457c5; --know-soft:#e6edfb; --watch:#9a6400; --watch-soft:#fbf0d9; --legacy:#8a3b3b; --legacy-soft:#f6e4e4;
+  --sans:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f141b; --panel:#161d26; --fg:#e4e9f0; --muted:#97a3b3; --line:#2a3441; --accent:#7ea4f2; --accent-soft:#1c2a44;
+  --ms:#6cb3f0; --ms-soft:#13283d; --anth:#e59a76; --anth-soft:#35221a; --oth:#aab2bd; --oth-soft:#232b35;
+  --core:#5fcf95; --core-soft:#14301f; --know:#7ea4f2; --know-soft:#1c2a44; --watch:#e7b65a; --watch-soft:#33280f; --legacy:#e38d8d; --legacy-soft:#371c1c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f141b; --panel:#161d26; --fg:#e4e9f0; --muted:#97a3b3; --line:#2a3441; --accent:#7ea4f2; --accent-soft:#1c2a44;
+  --ms:#6cb3f0; --ms-soft:#13283d; --anth:#e59a76; --anth-soft:#35221a; --oth:#aab2bd; --oth-soft:#232b35;
+  --core:#5fcf95; --core-soft:#14301f; --know:#7ea4f2; --know-soft:#1c2a44; --watch:#e7b65a; --watch-soft:#33280f; --legacy:#e38d8d; --legacy-soft:#371c1c; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:14px;line-height:1.5}
+.wrap{max-width:1320px;margin:0 auto;padding-block:28px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:20px}
+h1{font-size:clamp(24px,3vw,32px);font-weight:700;letter-spacing:-.01em;margin:0;text-wrap:balance}
+.lede{color:var(--muted);max-width:72ch;margin:6px 0 0}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:12.5px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.bar{display:grid;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;min-width:64px}
+input[type=search],select{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:7px 10px}
+input[type=search]{flex:1 1 260px;min-width:0}
+input:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chip{font:inherit;font-size:12.5px;border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:999px;padding:4px 11px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--panel)}
+.count{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.reset{font:inherit;font-size:12.5px;background:none;border:none;color:var(--accent);cursor:pointer;text-decoration:underline}
+.tablebox{overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;min-width:1040px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{position:sticky;top:0;background:var(--panel);font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600;z-index:1}
+th button{all:unset;cursor:pointer}
+th button:focus-visible{outline:2px solid var(--accent)}
+th .dir{font-family:var(--mono);margin-left:4px}
+tr.group td{background:var(--bg);font-weight:600;font-size:13px;padding-top:14px;color:var(--fg)}
+tr.group td small{color:var(--muted);font-weight:400;margin-left:8px}
+td.name{font-weight:600;min-width:180px}
+td.name a{color:var(--fg);text-decoration:none;border-bottom:1px solid var(--line)}
+td.name a:hover{border-color:var(--accent);color:var(--accent)}
+td.role{color:var(--muted);font-size:13px;min-width:130px}
+td.what{color:var(--fg);max-width:46ch}
+td.notes{color:var(--muted);font-size:12.5px;max-width:32ch}
+.pill{display:inline-block;font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.s-Microsoft{color:var(--ms);background:var(--ms-soft)} .s-Anthropic{color:var(--anth);background:var(--anth-soft)} .s-Other{color:var(--oth);background:var(--oth-soft)}
+.v-Core{color:var(--core);background:var(--core-soft)} .v-Know{color:var(--know);background:var(--know-soft)} .v-Watch{color:var(--watch);background:var(--watch-soft)} .v-Legacy{color:var(--legacy);background:var(--legacy-soft)}
+.cost{font-family:var(--mono);font-size:12px;white-space:nowrap}
+.type{font-size:12.5px;white-space:nowrap}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+.foot{font-size:12.5px;color:var(--muted);max-width:90ch}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1>Agentic Stack Atlas</h1>
+    <p class="lede">Every framework, tool, service and standard behind the seven Claude Code rounds, with the Microsoft option and the main non-Microsoft equivalents side by side. Filter by round, stack or cost, and sort any column. Verdicts are written for a C#/ASP.NET consultant.</p>
+  </header>
+
+  <div class="legend" aria-label="Verdict key">
+    <span><b class="pill v-Core">Core</b> master it and use it in your own work</span>
+    <span><b class="pill v-Know">Know</b> recognise it, evaluate it when a client uses it</span>
+    <span><b class="pill v-Watch">Watch</b> preview or emerging; check status before relying on it</span>
+    <span><b class="pill v-Legacy">Legacy</b> maintain existing use; don't start new work on it</span>
+  </div>
+
+  <section class="bar" aria-label="Filters">
+    <div class="row">
+      <input id="q" type="search" placeholder="Search names, purposes, notes… e.g. vector, MCP, eval" aria-label="Search">
+      <select id="stack" aria-label="Stack"><option value="">All stacks</option><option>Microsoft</option><option>Anthropic</option><option>Other</option></select>
+      <select id="cost" aria-label="Cost"><option value="">Any cost</option><option>Open source</option><option>Free</option><option>Free tier</option><option>Paid</option></select>
+      <select id="verdict" aria-label="Verdict"><option value="">Any verdict</option><option>Core</option><option>Know</option><option>Watch</option><option>Legacy</option></select>
+      <button class="reset" id="reset" type="button">Clear filters</button>
+    </div>
+    <div class="row" id="rounds"><span class="label">Round</span></div>
+    <div class="row"><span class="label">View</span>
+      <button class="chip" id="grouped" type="button" aria-pressed="true">Grouped by round</button>
+      <span class="count" id="count" aria-live="polite"></span>
+    </div>
+  </section>
+
+  <div class="tablebox">
+    <table id="t">
+      <thead><tr>
+        <th><button type="button" data-k="name">Name<span class="dir"></span></button></th>
+        <th><button type="button" data-k="role">Role<span class="dir"></span></button></th>
+        <th><button type="button" data-k="stack">Stack<span class="dir"></span></button></th>
+        <th><button type="button" data-k="type">Type<span class="dir"></span></button></th>
+        <th><button type="button" data-k="cost">Cost<span class="dir"></span></button></th>
+        <th><button type="button" data-k="verdict">Verdict<span class="dir"></span></button></th>
+        <th>What it's for</th>
+        <th>Notes</th>
+      </tr></thead>
+      <tbody id="body"></tbody>
+    </table>
+  </div>
+
+  <p class="foot">Status as of October 2026, from vendor announcements and documentation. Previews, prices and free tiers change often; check the vendor page before recommending anything to a client. "Open source" means the code is public under an OSS licence; most still need a paid model or cloud to run.</p>
+</div>
+
+<script>
+const ROUNDS = {
+  "R1": "Round 1 · Coding agents",
+  "R2": "Rounds 2–3 · CI/CD, DevOps and hosting",
+  "R4": "Round 4 · Spec-driven development",
+  "R5a": "Round 5 · Models and model access",
+  "R5b": "Round 5 · Agent frameworks and SDKs",
+  "R5c": "Round 5 · Agent hosting and low-code builders",
+  "R5d": "Round 5 · MCP and agent protocols",
+  "R6a": "Round 6 · Evals",
+  "R6b": "Round 6 · Red teaming, guardrails and identity",
+  "R6c": "Round 6 · Observability",
+  "R7a": "Round 7 · Retrieval services and RAG frameworks",
+  "R7b": "Round 7 · Vector stores",
+  "R7c": "Round 7 · Embeddings, re-ranking and ingestion",
+};
+// [round, role, name, stack, type, cost, verdict, what, notes, url]
+const D = [
+// R1
+["R1","Coding agent","Claude Code","Anthropic","CLI + IDE extension","Paid","Core","Agentic coding in the terminal, VS Code, JetBrains, web and mobile: reads the repo, edits, builds, tests, opens PRs","Rounds 1–7 are built on it; no official Visual Studio extension yet","https://docs.claude.com/en/docs/claude-code/overview"],
+["R1","Coding agent","GitHub Copilot (agent mode + coding agent)","Microsoft","IDE extension + cloud agent","Free tier","Know","Agentic coding inside Visual Studio and VS Code, plus a cloud agent that works issues into PRs","Many .NET clients already license it; you'll often work alongside it",""],
+["R1","IDE","Visual Studio 2026","Microsoft","IDE","Free tier","Core","Debugger, designers and profilers for .NET; supports MCP servers for Copilot","Keep for debugging and review; run Claude Code beside it",""],
+["R1","Editor","Visual Studio Code","Microsoft","Editor","Open source","Core","Where you review Claude Code's diffs; official Claude Code extension","",""],
+["R1","IDE","JetBrains Rider","Other","IDE","Paid","Know","Cross-platform .NET IDE with an official Claude Code plugin","Best alternative if you leave Visual Studio",""],
+["R1","Coding agent","Cursor","Other","AI editor","Paid","Know","AI-first VS Code fork with its own agent","Doesn't add much if you already use Claude Code",""],
+["R1","Coding agent","Windsurf","Other","AI editor","Paid","Know","AI-first editor with an agent mode","",""],
+["R1","Coding agent","OpenAI Codex CLI","Other","CLI","Open source","Know","OpenAI's terminal coding agent","Reads AGENTS.md, like Claude Code",""],
+["R1","Coding agent","Gemini CLI","Other","CLI","Open source","Know","Google's terminal coding agent","Free tier on a Google account",""],
+["R1","Coding agent","Kiro","Other","AI IDE","Paid","Know","AWS's agentic IDE with built-in spec-driven workflow","Also relevant to Round 4",""],
+["R1","Extensibility","Agent Skills (SKILL.md)","Anthropic","Open standard","Open source","Core","Packaged, reusable workflows an agent loads on demand","Open standard read by many agents, not just Claude","https://agentskills.io"],
+["R1","Extensibility","Claude Code plugins + marketplaces","Anthropic","Plugin system","Free","Core","Bundle skills, subagents, hooks and MCP servers into one install for a team","How you roll your setup out to a client team",""],
+["R1","Extensibility","Claude Code community Visual Studio extensions","Other","IDE extension","Open source","Watch","Third-party wrappers that put the Claude Code CLI inside Visual Studio","Unofficial; fewer features than the VS Code extension",""],
+
+// R2
+["R2","CI/CD","GitHub Actions","Microsoft","CI/CD service","Free tier","Core","Workflows, environments with approvals, OIDC to Azure","Free minutes for public repos","https://docs.github.com/actions"],
+["R2","AI in CI","Claude Code GitHub Action (claude-code-action)","Anthropic","GitHub Action","Open source","Core","@claude on issues and PRs, automated PR review on GitHub runners","Install with /install-github-app","https://github.com/anthropics/claude-code-action"],
+["R2","CI/CD","Azure Pipelines (Azure DevOps)","Microsoft","CI/CD service","Free tier","Core","Multi-stage YAML pipelines, environments, approval checks, service connections","New orgs may need to request the free hosted job",""],
+["R2","AI in CI","Headless Claude Code (claude -p)","Anthropic","CLI mode","Paid","Core","Run Claude non-interactively in any pipeline: Azure DevOps, GitLab, Jenkins","How you add AI review where there's no ready-made app",""],
+["R2","CI/CD","GitLab CI + GitLab Duo","Other","CI/CD + AI","Paid","Know","GitLab's pipelines with built-in AI assistance","",""],
+["R2","Platform MCP","GitHub MCP Server","Microsoft","MCP server","Open source","Core","Lets agents read and act on issues, PRs, Actions runs","Maintained by GitHub","https://github.com/github/github-mcp-server"],
+["R2","Platform MCP","Azure DevOps MCP Server","Microsoft","MCP server","Open source","Core","Work items, repos, PRs and pipeline logs for agents","Hosted remote version exists; use the local one with Claude Code for now","https://github.com/microsoft/azure-devops-mcp"],
+["R2","Platform MCP","Azure MCP Server","Microsoft","MCP server","Open source","Know","Lets agents query and manage Azure resources","Keep write operations on ask","https://github.com/microsoft/mcp"],
+["R2","Docs grounding","Microsoft Learn MCP Server","Microsoft","Hosted MCP server","Free","Core","Current Microsoft docs for your agent, so it stops guessing API shapes","Endpoint: learn.microsoft.com/api/mcp",""],
+["R2","IaC","Bicep","Microsoft","IaC language","Open source","Know","Azure-native infrastructure as code","Ask Claude to generate it instead of portal clicks",""],
+["R2","IaC","Azure Developer CLI (azd)","Microsoft","CLI","Open source","Know","Templates that provision and deploy an app end to end","",""],
+["R2","IaC","Terraform / OpenTofu","Other","IaC tool","Open source","Know","Multi-cloud infrastructure as code","OpenTofu is the open-source fork",""],
+["R2","Hosting","Azure App Service","Microsoft","PaaS","Free tier","Core","Hosts web apps and containers; F1 free, B1 for containers + Always On","Used in Rounds 2 and 3",""],
+["R2","Hosting","Azure Container Apps","Microsoft","Serverless containers","Paid","Know","Scale-to-zero containers, good for APIs and MCP servers","",""],
+["R2","Registry","Azure Container Registry","Microsoft","Container registry","Paid","Know","Private images pulled with managed identity","Used in Round 3",""],
+["R2","Registry","GitHub Container Registry (GHCR)","Microsoft","Container registry","Free tier","Core","Images next to your code; free for public images","Used in Round 2",""],
+["R2","Hosting","Render","Other","PaaS","Free tier","Know","Simple container hosting with a free tier","Free services sleep after 15 min idle",""],
+["R2","Hosting","Fly.io / Railway","Other","PaaS","Paid","Know","Developer-friendly container hosting","",""],
+
+// R4
+["R4","SDD toolkit","GitHub Spec Kit","Microsoft","CLI + agent skills","Open source","Core","Constitution, specify, clarify, plan, tasks, implement, converge","Works with Claude Code","https://github.com/github/spec-kit"],
+["R4","SDD toolkit","Kiro specs","Other","IDE feature","Paid","Know","Requirements, design and tasks files inside AWS's IDE","",""],
+["R4","SDD toolkit","Tessl","Other","Platform","Paid","Watch","Spec-centric development platform and spec registry","",""],
+["R4","BDD","Reqnroll","Other","Test framework","Open source","Core","Executable Gherkin specs for .NET on xUnit, NUnit, MSTest or TUnit","Community successor to SpecFlow","https://reqnroll.net"],
+["R4","BDD","SpecFlow","Other","Test framework","Free","Legacy","The original .NET Gherkin framework","Migrate to Reqnroll",""],
+["R4","Testing","xUnit + WebApplicationFactory","Microsoft","Test libraries","Open source","Core","Integration tests against the real ASP.NET Core pipeline","The feedback loop agents rely on",""],
+["R4","Testing","Playwright for .NET + Playwright MCP","Microsoft","Browser testing","Open source","Core","End-to-end UI tests; the MCP server lets agents drive a browser","",""],
+
+// R5a
+["R5a","Model API","Claude API (Claude Platform)","Anthropic","Model API","Paid","Core","Messages API, tool use, prompt caching, batches, citations, Files API","",""],
+["R5a","Model access","Claude in Microsoft Foundry","Microsoft","Model hosting","Paid","Core","Claude inside the client's Azure tenancy, billing and governance","Anthropic.Foundry NuGet package",""],
+["R5a","Model access","Azure OpenAI in Foundry","Microsoft","Model hosting","Paid","Know","OpenAI models under Azure governance","",""],
+["R5a","Model access","Amazon Bedrock","Other","Model hosting","Paid","Know","Claude and other models for AWS clients","Anthropic.Bedrock NuGet package",""],
+["R5a","Model access","Google Vertex AI","Other","Model hosting","Paid","Know","Claude and Gemini for Google Cloud clients","Anthropic.Vertex NuGet package",""],
+["R5a","Local models","Ollama","Other","Local runtime","Open source","Know","Run open models and embedding models on your machine","Good for offline practice and private data experiments","https://ollama.com"],
+
+// R5b
+["R5b","Model SDK","Anthropic C# SDK (Anthropic NuGet)","Anthropic","SDK (.NET)","Open source","Core","Official Claude client for .NET; implements IChatClient","v10+ is the official package","https://github.com/anthropics/anthropic-sdk-csharp"],
+["R5b","AI abstraction","Microsoft.Extensions.AI","Microsoft","Library (.NET)","Open source","Core","IChatClient, IEmbeddingGenerator, middleware (function calling, telemetry, caching)","The root abstraction of the .NET AI stack",""],
+["R5b","Agent framework","Microsoft Agent Framework","Microsoft","Framework (.NET, Python)","Open source","Core","Agents, multi-agent workflows, MCP and A2A, checkpointing, human-in-the-loop","1.0 GA April 2026; successor to Semantic Kernel and AutoGen",""],
+["R5b","Agent framework","Semantic Kernel","Microsoft","Framework (.NET, Python)","Open source","Legacy","Former Microsoft orchestration SDK","Maintenance mode: critical fixes only; start new work on Agent Framework",""],
+["R5b","Agent framework","AutoGen","Microsoft","Framework (Python, .NET)","Open source","Legacy","Former Microsoft multi-agent research framework","Maintenance only; superseded by Agent Framework",""],
+["R5b","Agent SDK","Claude Agent SDK","Anthropic","SDK (Python, TS)","Open source","Know","The Claude Code harness as a library: tools, subagents, hooks, compaction","No C# version; run as a sidecar or use Agent Framework",""],
+["R5b","Agent framework","LangGraph","Other","Framework (Python, TS)","Open source","Know","Agents as stateful graphs; the most widely used non-Microsoft option","LangSmith is its paid tracing platform",""],
+["R5b","Agent framework","LangChain","Other","Framework (Python, TS)","Open source","Know","Broad ecosystem of LLM building blocks and integrations","",""],
+["R5b","Agent framework","CrewAI","Other","Framework (Python)","Open source","Know","Role-based teams of agents; fast to prototype","",""],
+["R5b","Agent SDK","OpenAI Agents SDK","Other","SDK (Python, TS)","Open source","Know","Minimal agents with handoffs and tracing, OpenAI-first","",""],
+["R5b","Agent framework","Google Agent Development Kit (ADK)","Other","Framework (Python, Java, Go, TS)","Open source","Know","Agent trees and graphs, A2A Agent Cards, deploys to Vertex","",""],
+["R5b","Agent framework","AWS Strands Agents","Other","Framework (Python)","Open source","Know","Model-driven agents; pairs with Bedrock AgentCore","",""],
+["R5b","Agent framework","Pydantic AI","Other","Framework (Python)","Open source","Watch","Type-safe Python agents","",""],
+["R5b","Agent framework","Mastra","Other","Framework (TypeScript)","Open source","Watch","TypeScript agents, workflows and RAG","",""],
+
+// R5c
+["R5c","Managed agents","Claude Managed Agents","Anthropic","Managed service","Paid","Know","Anthropic-hosted agent harness, sandbox, credentials and tracing","Public beta since April 2026","https://claude.com/blog/claude-managed-agents"],
+["R5c","Managed agents","Foundry Agent Service (prompt + hosted agents)","Microsoft","Managed service","Paid","Know","Run agents built with any framework in per-session sandboxes, with Entra Agent ID","Hosted agents announced GA mid-2026; check region status",""],
+["R5c","Managed agents","Amazon Bedrock AgentCore","Other","Managed service","Paid","Know","AWS runtime, memory, identity and gateway for agents","",""],
+["R5c","Managed agents","Vertex AI Agent Engine","Other","Managed service","Paid","Know","Google Cloud hosting for ADK and other agents","",""],
+["R5c","Low-code","Microsoft Copilot Studio","Microsoft","Low-code builder","Paid","Know","Business users build agents for Teams and M365, with MCP tools","Often what a client already owns; integrate rather than compete",""],
+["R5c","Low-code","Power Automate / Logic Apps","Microsoft","Workflow automation","Paid","Know","Deterministic workflows with AI steps; Logic Apps can expose an MCP server","",""],
+["R5c","Low-code","n8n","Other","Workflow automation","Open source","Know","Self-hostable visual workflows with AI and MCP nodes","",""],
+
+// R5d
+["R5d","Protocol","Model Context Protocol (MCP)","Other","Open standard","Open source","Core","The standard plug between agents and tools or data","Governed under the Linux Foundation","https://modelcontextprotocol.io"],
+["R5d","MCP SDK","MCP C# SDK (ModelContextProtocol + .AspNetCore)","Microsoft","SDK (.NET)","Open source","Core","Build MCP servers and clients in .NET; HTTP transport with MapMcp","Official SDK, co-maintained with Microsoft","https://github.com/modelcontextprotocol/csharp-sdk"],
+["R5d","MCP tooling","MCP Inspector","Other","Dev tool","Open source","Core","Call your server's tools by hand and read their descriptions","npx @modelcontextprotocol/inspector",""],
+["R5d","Protocol","Agent2Agent (A2A)","Other","Open standard","Open source","Know","Agents discovering and delegating to other agents","Supported by Agent Framework, ADK and APIM",""],
+["R5d","MCP gateway","Azure API Management (AI gateway + MCP)","Microsoft","API gateway","Paid","Know","Expose APIs as MCP servers; auth, rate limits, content safety on tool calls","Natural control plane for Azure clients",""],
+["R5d","MCP registry","Azure API Center","Microsoft","Registry","Free tier","Know","Catalogue of approved MCP servers your agents can discover","",""],
+["R5d","Tool governance","Foundry Toolboxes","Microsoft","Managed service","Paid","Watch","Register tools and MCP servers once behind one governed endpoint","Preview in 2026",""],
+["R5d","MCP gateway","Kong AI Gateway","Other","API gateway","Paid","Know","Token limits, routing and MCP auth on Kong","",""],
+["R5d","MCP hosting","Cloudflare Agents + remote MCP","Other","Edge platform","Free tier","Know","Host remote MCP servers with OAuth at the edge","",""],
+["R5d","MCP catalog","Docker MCP Catalog and Toolkit","Other","Catalog + runtime","Free","Know","Run vetted MCP servers in containers","",""],
+["R5d","MCP auth","Arcade","Other","Tool platform","Paid","Watch","Authenticated tool calling on behalf of users","",""],
+
+// R6a
+["R6a","Evals (.NET)","Microsoft.Extensions.AI.Evaluation","Microsoft","Library (.NET)","Open source","Core","Quality and safety evaluators, response caching, reports, dotnet aieval CLI","Fits your xUnit tests and Azure DevOps reports",""],
+["R6a","Evals (platform)","Foundry evaluations","Microsoft","Managed service","Paid","Know","Built-in and custom evaluators, rubric evaluators, continuous evaluation","",""],
+["R6a","Evals","promptfoo","Other","CLI + library","Open source","Know","YAML test cases for prompts and agents, with red-team mode","Language-agnostic; easy in any CI",""],
+["R6a","Evals","DeepEval","Other","Library (Python)","Open source","Know","Pytest-style LLM evaluation metrics","",""],
+["R6a","Evals (RAG)","Ragas","Other","Library (Python)","Open source","Know","Retrieval and answer metrics: faithfulness, context precision and recall","Also relevant to Round 7",""],
+["R6a","Evals","Inspect AI","Other","Framework (Python)","Open source","Watch","Evaluation framework from the UK AI Security Institute","",""],
+["R6a","Evals (Claude)","Claude Console evaluation tool","Anthropic","Web tool","Free","Know","Test a prompt against many inputs side by side in the Console","",""],
+
+// R6b
+["R6b","Red teaming","PyRIT","Microsoft","Toolkit (Python)","Open source","Know","Microsoft AI Red Team's toolkit for automated attacks","Doesn't model agent tool state natively","https://github.com/Azure/PyRIT"],
+["R6b","Red teaming","AI Red Teaming Agent (Foundry)","Microsoft","Managed service","Paid","Watch","Automated red-team scans of models and agents, built on PyRIT","Preview",""],
+["R6b","Red teaming","garak","Other","Scanner (Python)","Open source","Know","NVIDIA's LLM vulnerability scanner","",""],
+["R6b","Guardrails","Azure AI Content Safety + Prompt Shields","Microsoft","Managed service","Paid","Know","Harm filters and prompt-injection detection on inputs and documents","A layer of defence, not a substitute for server-side permissions",""],
+["R6b","Guardrails","NVIDIA NeMo Guardrails","Other","Library (Python)","Open source","Know","Programmable rails around LLM conversations","",""],
+["R6b","Guardrails","Lakera Guard","Other","API","Paid","Know","Prompt-injection and data-leak detection as a service","",""],
+["R6b","Identity","Microsoft Entra ID","Microsoft","Identity platform","Free tier","Core","Real identities for MCP servers and agents; Entra Agent ID for agents themselves","Round 6's production auth path",""],
+["R6b","Identity (dev)","dotnet user-jwts","Microsoft","CLI tool","Open source","Core","Signed development JWTs for ASP.NET Core with no identity provider","Used in Round 6",""],
+["R6b","Security posture","Microsoft Defender for Cloud (AI protection)","Microsoft","Managed service","Paid","Know","Inventory of agents and MCP servers and AI threat detection","",""],
+["R6b","Cost control","Claude Console workspaces + spend limits","Anthropic","Admin feature","Free","Core","Separate keys per project with spending caps","Set before every eval run",""],
+
+// R6c
+["R6c","Telemetry standard","OpenTelemetry GenAI semantic conventions","Other","Open standard","Open source","Core","Standard spans for model calls and tool calls","Emitted by Microsoft.Extensions.AI and Agent Framework",""],
+["R6c","Observability","Azure Monitor + Application Insights","Microsoft","Managed service","Paid","Core","Where your OpenTelemetry traces land in an Azure shop","",""],
+["R6c","Observability","Langfuse","Other","Platform","Open source","Know","LLM tracing, prompt management and evals; self-hostable","",""],
+["R6c","Observability","LangSmith","Other","Platform","Paid","Know","Tracing and evals from the LangChain team","",""],
+["R6c","Observability","Arize Phoenix","Other","Platform","Open source","Know","OpenTelemetry-native LLM tracing and evaluation","",""],
+
+// R7a
+["R7a","Managed retrieval","Azure AI Search","Microsoft","Search service","Free tier","Core","Hybrid (keyword + vector) search, semantic ranker, security trimming","The default retrieval store for Azure clients",""],
+["R7a","Managed retrieval","Foundry IQ (knowledge bases, agentic retrieval)","Microsoft","Managed service","Paid","Know","Multi-source knowledge bases over Search, SharePoint, OneLake, exposed over MCP","Built on Azure AI Search; adds LLM query planning cost",""],
+["R7a","Buy, not build","Microsoft 365 Copilot + Copilot connectors","Microsoft","SaaS","Paid","Know","Document Q&A across a client's M365 content out of the box","Sometimes the right answer is to configure this instead of building RAG",""],
+["R7a","RAG technique","Contextual retrieval","Anthropic","Technique","Free","Core","Prefix each chunk with LLM-written context before indexing","Cheap, large gain; used in Round 7",""],
+["R7a","Citations","Claude search result blocks + citations","Anthropic","API feature","Paid","Core","Return passages to Claude and get exact, automatic citations","Used in Round 7","https://platform.claude.com/docs/en/build-with-claude/search-results"],
+["R7a","RAG library","Kernel Memory","Microsoft","Library/service (.NET)","Open source","Watch","Earlier Microsoft ingestion-and-retrieval service for .NET","Check project status; prefer VectorData + Agent Framework for new work",""],
+["R7a","Graph RAG","Microsoft GraphRAG","Microsoft","Library (Python)","Open source","Watch","Builds a knowledge graph from documents for global questions","Expensive to index; niche but powerful",""],
+["R7a","RAG framework","LlamaIndex","Other","Framework (Python, TS)","Open source","Know","Ingestion, indexing and retrieval pipelines; LlamaParse for documents","",""],
+["R7a","RAG framework","Haystack","Other","Framework (Python)","Open source","Know","Production RAG pipelines from deepset","",""],
+
+// R7b
+["R7b","Vector abstraction","Microsoft.Extensions.VectorData","Microsoft","Library (.NET)","Open source","Core","One API over many vector stores; swap stores without rewriting","",""],
+["R7b","Vector store (local)","SQLite + sqlite-vec connector","Microsoft","Connector (.NET)","Open source","Core","Vectors and full-text search in one local file","Used in Round 7; connector is preview",""],
+["R7b","Vector store","SQL Server 2025 / Azure SQL vectors","Microsoft","Database feature","Paid","Know","Native VECTOR type in the database clients already run","Often the simplest enterprise choice",""],
+["R7b","Vector store","Azure Cosmos DB vector search","Microsoft","Database feature","Paid","Know","Vectors alongside operational JSON data","",""],
+["R7b","Vector store","PostgreSQL + pgvector","Other","Database extension","Open source","Know","Vectors in Postgres; available on Azure Database for PostgreSQL","",""],
+["R7b","Vector store","Qdrant","Other","Vector database","Open source","Know","Fast open-source vector DB with filtering; managed cloud available","",""],
+["R7b","Vector store","Pinecone","Other","Vector database","Paid","Know","Fully managed serverless vector DB","",""],
+["R7b","Vector store","Weaviate","Other","Vector database","Open source","Know","Open-source vector DB with hybrid search","",""],
+["R7b","Vector store","Elasticsearch / OpenSearch","Other","Search engine","Open source","Know","Mature keyword search with vector support","",""],
+
+// R7c
+["R7c","Embeddings","Voyage AI","Other","Embedding API","Paid","Core","Embedding and re-ranking models; Anthropic's recommended provider","Domain models for code, law and finance","https://platform.claude.com/docs/en/build-with-claude/embeddings"],
+["R7c","Embeddings","Azure OpenAI embeddings","Microsoft","Embedding API","Paid","Know","Embeddings inside the client's Azure tenancy","",""],
+["R7c","Re-ranking","Azure AI Search semantic ranker","Microsoft","Search feature","Paid","Know","Re-ranks hybrid results by meaning","",""],
+["R7c","Re-ranking","Cohere Rerank","Other","API","Paid","Know","General-purpose re-ranking model","",""],
+["R7c","Ingestion","Azure AI Document Intelligence / Content Understanding","Microsoft","Managed service","Paid","Know","Layout, tables and fields from PDFs and scans","",""],
+["R7c","Ingestion","Claude PDF support + Files API","Anthropic","API feature","Paid","Core","Read PDFs including tables and charts; convert to clean markdown","Used in Round 7",""],
+["R7c","Ingestion","Docling","Other","Library (Python)","Open source","Know","PDF and Office conversion to structured markdown","",""],
+["R7c","Ingestion","Unstructured","Other","Library + API","Open source","Know","Partitioning and chunking for many file types","",""],
+];
+
+const rows = D.map((r,i)=>({i,round:r[0],role:r[1],name:r[2],stack:r[3],type:r[4],cost:r[5],verdict:r[6],what:r[7],notes:r[8],url:r[9]}));
+const order = Object.keys(ROUNDS);
+const stackRank={Microsoft:0,Anthropic:1,Other:2}, verdictRank={Core:0,Know:1,Watch:2,Legacy:3};
+const state={q:"",stack:"",cost:"",verdict:"",rounds:new Set(),grouped:true,sort:null,dir:1};
+
+const roundBar=document.getElementById("rounds");
+const roundGroups=[["R1","1"],["R2","2–3"],["R4","4"],["R5","5"],["R6","6"],["R7","7"]];
+roundGroups.forEach(([k,label])=>{
+  const b=document.createElement("button");b.className="chip";b.type="button";b.textContent="Round "+label;b.setAttribute("aria-pressed","false");b.id="round-"+k;
+  b.onclick=()=>{state.rounds.has(k)?state.rounds.delete(k):state.rounds.add(k);b.setAttribute("aria-pressed",state.rounds.has(k));render()};
+  roundBar.appendChild(b);
+});
+
+const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function cmp(a,b){
+  if(state.sort){
+    const k=state.sort; let x=a[k],y=b[k];
+    if(k==="stack"){x=stackRank[x];y=stackRank[y]} else if(k==="verdict"){x=verdictRank[x];y=verdictRank[y]}
+    if(x<y)return -state.dir; if(x>y)return state.dir;
+  }
+  return order.indexOf(a.round)-order.indexOf(b.round) || a.role.localeCompare(b.role) || stackRank[a.stack]-stackRank[b.stack] || verdictRank[a.verdict]-verdictRank[b.verdict] || a.name.localeCompare(b.name);
+}
+function row(r){
+  const name=r.url?`<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.name)}</a>`:esc(r.name);
+  return `<tr><td class="name">${name}</td><td class="role">${esc(r.role)}</td><td><span class="pill s-${r.stack}">${r.stack}</span></td><td class="type">${esc(r.type)}</td><td class="cost">${esc(r.cost)}</td><td><span class="pill v-${r.verdict}">${r.verdict}</span></td><td class="what">${esc(r.what)}</td><td class="notes">${esc(r.notes)}</td></tr>`;
+}
+function render(){
+  const q=state.q.toLowerCase();
+  const f=rows.filter(r=>(!q||(r.name+" "+r.role+" "+r.what+" "+r.notes+" "+r.type).toLowerCase().includes(q))
+    &&(!state.stack||r.stack===state.stack)&&(!state.cost||r.cost===state.cost)&&(!state.verdict||r.verdict===state.verdict)
+    &&(!state.rounds.size||[...state.rounds].some(k=>r.round.startsWith(k)))).sort(cmp);
+  let html="";
+  if(!f.length) html=`<tr><td colspan="8" class="empty">Nothing matches these filters. Try clearing one.</td></tr>`;
+  else if(state.grouped && !state.sort){
+    let cur=null;
+    for(const r of f){ if(r.round!==cur){cur=r.round;const n=f.filter(x=>x.round===cur).length;html+=`<tr class="group"><td colspan="8">${ROUNDS[cur]}<small>${n} item${n>1?"s":""}</small></td></tr>`} html+=row(r) }
+  } else html=f.map(row).join("");
+  document.getElementById("body").innerHTML=html;
+  const ms=f.filter(r=>r.stack==="Microsoft").length;
+  document.getElementById("count").textContent=`${f.length} of ${rows.length} · ${ms} Microsoft`;
+  document.querySelectorAll("th button").forEach(b=>{b.querySelector(".dir").textContent=state.sort===b.dataset.k?(state.dir>0?"↑":"↓"):""});
+}
+document.getElementById("q").oninput=e=>{state.q=e.target.value;render()};
+["stack","cost","verdict"].forEach(id=>document.getElementById(id).onchange=e=>{state[id]=e.target.value;render()});
+document.querySelectorAll("th button").forEach(b=>b.onclick=()=>{
+  const k=b.dataset.k; if(state.sort===k){ if(state.dir===1) state.dir=-1; else {state.sort=null;state.dir=1} } else {state.sort=k;state.dir=1}
+  render();
+});
+const g=document.getElementById("grouped");
+g.onclick=()=>{state.grouped=!state.grouped;g.setAttribute("aria-pressed",state.grouped);render()};
+document.getElementById("reset").onclick=()=>{
+  Object.assign(state,{q:"",stack:"",cost:"",verdict:"",sort:null,dir:1});state.rounds.clear();
+  ["q","stack","cost","verdict"].forEach(id=>document.getElementById(id).value="");
+  document.querySelectorAll("#rounds .chip").forEach(c=>c.setAttribute("aria-pressed","false"));render();
+};
+render();
+</script>
+
+</body>
+</html>
